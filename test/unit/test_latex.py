@@ -3,7 +3,7 @@ import pytest
 from pyquil.quil import Program, Pragma
 from pyquil.quilbase import Declare, Measurement, JumpTarget, Jump
 from pyquil.quilatom import MemoryReference, Label
-from pyquil.gates import H, X, Y, XY, RX, CZ, CPHASE, SWAP, MEASURE, CNOT, WAIT, MOVE
+from pyquil.gates import H, X, Y, XY, RX, CZ, CPHASE, SWAP, MEASURE, CNOT, CCNOT, WAIT, MOVE
 from pyquil.latex import to_latex, DiagramSettings
 from pyquil.latex._diagram import split_on_terminal_measures
 
@@ -200,3 +200,10 @@ def test_2q_swap_cnot_circuit():
     actual = to_latex(prog).split()
     start_idx = actual.index("\\begin{tikzcd}")
     assert expected == actual[start_idx : start_idx + len(expected)]
+
+
+def test_controlled_cnot_and_ccnot_equivalence():
+    """Check that CONTROLLED CNOT and CCNOT produce the same diagram."""
+    expected = to_latex(Program(CNOT(1, 0).controlled(2)))
+    actual = to_latex(Program(CCNOT(0, 1, 2)))
+    assert expected == actual

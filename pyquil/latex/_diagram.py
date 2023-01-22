@@ -377,6 +377,9 @@ class DiagramBuilder:
                     if instr.name in SOURCE_TARGET_OP and not instr.modifiers:
                         self._build_custom_source_target_op()
                     else:
+                        if instr.name not in SOURCE_TARGET_OP:
+                            _find_equivalent_instr(instr)
+
                         self._build_generic_unitary()
             elif isinstance(instr, UNSUPPORTED_INSTRUCTION_CLASSES):
                 raise ValueError(
@@ -530,3 +533,14 @@ def qubit_indices(instr: AbstractInstruction) -> List[int]:
         return [qubit.index for qubit in instr.qubits]
     else:
         return []
+
+
+def _find_equivalent_instr(instr: Gate) -> None:
+    """
+    Check for an equivalent instruction and update it if found.
+    """
+    if instr.name == "CCNOT":
+        # Convert CCNOT to CONTROLLED CNOT
+        instr.name = "CNOT"
+        instr.modifiers.append('CONTROLLED')
+        instr.qubits[0], instr.qubits[len(instr.qubits) - 1] = instr.qubits[len(instr.qubits) - 1], instr.qubits[0]
